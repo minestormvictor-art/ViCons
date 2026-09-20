@@ -32,9 +32,12 @@ desktop.ini
 ~$*
 
 # ---------- 部署產物 ----------
-_cf_drop/
-*.zip
+# 中間目錄可用 build-drop.py 隨時重建 → 不入庫
+_cf_drop/vicons/
 dist/
+*.zip
+# 例外：部署 zip 入庫，方便直接由 GitHub 下載投放 Cloudflare
+!_cf_drop/vicons-cloudflare.zip
 
 # ---------- 憑證（永不入庫） ----------
 .env

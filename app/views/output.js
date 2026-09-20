@@ -5,9 +5,16 @@
   'use strict';
   var el = VC.el, frag = VC.frag;
 
+  /* 測試基線（2026-09-20）：以下 4 項硬性缺漏刻意留空（未附／0 頁），
+     用於驗證「阻斷閘門」——「產生提交包」按鈕必須維持 disabled。
+     待之後接入真實資料時再逐項補齊：
+       · 工程量清單 (BQ) — 含單價   st:block    含單價違反「量價分離」
+       · 標書須知附表 1–5           st:block
+       · 進度計劃 (P6 基線)         st:missing
+       · MiC 預製組件供應商證明     st:missing  */
   var ITEMS = [
     { n: '投標書封面及簽署頁', cat: '標書', req: true, st: 'ok', file: 'Tender_Form_Signed.pdf', pg: 4 },
-    { n: '工程量清單 (BQ) — 含單價', cat: '造價', req: true, st: 'block', file: 'BQ_Rev_C.xlsx', pg: 142 },
+    { n: '工程量清單 (BQ) — 含單價', cat: '造價', req: true, st: 'block', file: '—', pg: 0 },
     { n: '標書須知附表 1–5', cat: '標書', req: true, st: 'block', file: '—', pg: 0 },
     { n: '方法說明書 (Method Statement)', cat: '技術', req: true, st: 'ok', file: 'MS_WO053B_ref.docx', pg: 38 },
     { n: '進度計劃 (P6 基線)', cat: '技術', req: true, st: 'missing', file: '—', pg: 0 },
@@ -28,6 +35,8 @@
   VC.registerView('output', { nav: 'output', wide: true }, function (root, ctx) {
     var ready = ITEMS.filter(function (i) { return i.st === 'ok'; }).length;
     var blockers = ITEMS.filter(function (i) { return i.req && (i.st === 'block' || i.st === 'missing'); });
+    var pendingN = ITEMS.filter(function (i) { return i.st === 'pending'; }).length;
+    var totalPages = ITEMS.reduce(function (a, i) { return a + (i.pg || 0); }, 0);
     var canSubmit = blockers.length === 0;
 
     root.appendChild(ctx.pagehead({
@@ -40,7 +49,7 @@
           class: 'btn btn--primary',
           disabled: !canSubmit ? 'disabled' : null,
           'aria-disabled': !canSubmit ? 'true' : null,
-          onclick: function () { if (canSubmit) ctx.toast('已產生提交包：10 份文件 · 342 頁', 'ok'); }
+          onclick: function () { if (canSubmit) ctx.toast('已產生提交包：' + ITEMS.length + ' 份文件 · ' + totalPages + ' 頁', 'ok'); }
         }, canSubmit ? '▶ 產生提交包' : '🔒 產生提交包（受阻）')
       ]
     }));
@@ -69,12 +78,12 @@
         }, '查看合規矩陣 →')));
     }
 
-    /* ---------- 進度 ---------- */
+    /* ---------- 進度（頂頁統計卡固定序：阻斷 → 已備齊 → 待簽 → 總頁數） ---------- */
     root.appendChild(el('div', { class: 'grid grid--4', style: 'margin-bottom:var(--sp-5)' },
-      ctx.stat({ icon: '✓', value: ready, label: '已備齊', badge: '可提交', badgeKind: 'ok' }),
       ctx.stat({ icon: '🔒', value: blockers.length, label: '硬性阻斷', badge: '必須解決', badgeKind: 'danger' }),
-      ctx.stat({ icon: '✎', value: 1, label: '待簽', badge: 'EOT', badgeKind: 'warn' }),
-      ctx.stat({ icon: '▤', value: '342', label: '總頁數' })));
+      ctx.stat({ icon: '✓', value: ready, label: '已備齊', badge: '可提交', badgeKind: 'ok' }),
+      ctx.stat({ icon: '✎', value: pendingN, label: '待簽', badge: 'EOT', badgeKind: 'warn' }),
+      ctx.stat({ icon: '▤', value: String(totalPages), label: '總頁數' })));
 
     /* ---------- 清單表 ---------- */
     root.appendChild(ctx.secTitle('提交物明細'));
@@ -109,7 +118,7 @@
           attrs: { class: isBlock ? 'is-flagged' : '' }
         };
       }),
-      foot: ['', ITEMS.length + ' 項提交物', '', blockers.length + ' 項阻斷', '', '342', '']
+      foot: ['', ITEMS.length + ' 項提交物', '', blockers.length + ' 項阻斷', '', String(totalPages), '']
     }));
 
     /* ---------- 出圖規範核對（本機既有要求） ---------- */

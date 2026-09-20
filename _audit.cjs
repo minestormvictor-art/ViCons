@@ -282,6 +282,41 @@ ok(scrims.length === 1, '抽屜有遮罩可點擊關閉');
 ok(comps.includes('@media (max-width: 1280px)') && comps.includes('.inspector.is-open'),
    '組件層在 ≤1280px 把檢視器切換為抽屜');
 
+/* ---------- 第三批：提交阻斷閘門與頂頁統計卡序（2026-09-20） ---------- */
+
+function textOf(n) {
+  let s = typeof n.textContent === 'string' ? n.textContent : '';
+  for (const k of n.childNodes || []) s += textOf(k);
+  return s;
+}
+
+// 13. 提交清單：4 項硬性缺漏必須「留空」但維持阻斷（測試基線，之後再逐項補齊）
+const outSrc = fs.readFileSync(path.join(ROOT, 'app/views/output.js'), 'utf8');
+registry['view-root'].childNodes = [];
+VC.go('output');
+const blockerNames = ['工程量清單 (BQ) — 含單價', '標書須知附表 1–5', '進度計劃 (P6 基線)', 'MiC 預製組件供應商證明'];
+const presentBlockers = blockerNames.filter(n => countText(registry['view-root'], n) > 0);
+ok(presentBlockers.length === 4, '提交受阻列出全部 4 項硬性缺漏（實得 ' + presentBlockers.length + '）');
+ok(!outSrc.includes('BQ_Rev_C.xlsx') && !outSrc.includes('pg: 142'),
+   'BQ 測試資料已清除（無示範檔名／142 頁）');
+ok(countText(registry['view-root'], '未附') >= 4, '4 項缺漏皆顯示「未附」');
+
+// 14. 頂頁統計卡固定序：硬性阻斷 → 已備齊 → 待簽 → 總頁數
+const statLabels = [];
+(function collectStat(n) {
+  if (n.className && String(n.className).split(/\s+/).includes('stat__label')) statLabels.push(textOf(n));
+  for (const k of n.childNodes || []) collectStat(k);
+})(registry['view-root']);
+const wantOrder = ['硬性阻斷', '已備齊', '待簽', '總頁數'];
+const gotOrder = statLabels.slice(0, 4);
+ok(JSON.stringify(gotOrder) === JSON.stringify(wantOrder),
+   '頂頁統計卡固定序 ' + wantOrder.join(' → ') + '（實得 ' + (gotOrder.join(' → ') || '無') + '）');
+
+// 15. 總頁數必須由項目推導，不得硬編碼
+ok(!outSrc.includes("'342'"), '總頁數已由項目推導（原始碼無硬編碼 342）');
+ok(countText(registry['view-root'], '141') > 0, '推導出的總頁數 141 已呈現');
+console.log('  · 提交清單實測：阻斷 ' + presentBlockers.length + ' 項 · 統計卡序 ' + gotOrder.join(' → '));
+
 /* ---------- 結果 ---------- */
 console.log('\n════════════════════════════════════════');
 console.log('  渲染迴歸：' + PASS + ' PASS / ' + FAIL + ' FAIL');
