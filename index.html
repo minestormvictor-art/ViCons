@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ViCons — 投標與算量協同平台</title>
+<link rel="stylesheet" href="tokens/vicons-tokens.css">
+<link rel="stylesheet" href="tokens/vicons-components.css">
+<style>
+  /* 原型導覽列專用（不屬於產品 UI，是為了讓你逐頁翻） */
+  .proto-strip{
+    background:var(--chrome-sidebar); border-bottom:1px solid var(--line);
+    padding:6px 16px; display:flex; align-items:center; gap:8px;
+    font-size:11.5px; overflow-x:auto;
+  }
+  .proto-strip__label{color:var(--ink-ghost); text-transform:uppercase; letter-spacing:.08em; font-weight:600; flex-shrink:0;}
+  .proto-chip{
+    background:var(--panel); border:1px solid var(--line); color:var(--ink-faint);
+    border-radius:var(--r-full); padding:3px 10px; cursor:pointer; white-space:nowrap;
+    font-family:var(--font-ui); font-size:11.5px;
+  }
+  .proto-chip:hover{border-color:var(--line-strong); color:var(--ink-soft);}
+  .proto-chip.on{background:var(--cobalt-wash); border-color:var(--cobalt); color:var(--ink); font-weight:600;}
+  .proto-strip__sep{width:1px;height:16px;background:var(--line);flex-shrink:0;}
+
+  /* 原型審查面板（同樣不屬於產品 UI；正式實作時連同 devpanel.js 一併刪掉） */
+  .devpanel-bar{
+    display:flex; align-items:center; justify-content:flex-end;
+    margin-bottom:var(--sp-4);
+  }
+  .devpanel{
+    display:flex; align-items:center; gap:var(--sp-2);
+    padding:var(--sp-1) var(--sp-2); border:1px dashed var(--line-strong);
+    border-radius:var(--r-md); background:var(--chrome-inset);
+  }
+  .devpanel__label{
+    font-size:var(--fs-2xs); color:var(--ink-ghost);
+    text-transform:uppercase; letter-spacing:.08em; font-weight:600;
+  }
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#main">跳至主內容</a>
+
+<div class="proto-strip" id="proto-strip">
+  <span class="proto-strip__label">原型導覽</span>
+  <span class="proto-strip__sep"></span>
+  <button class="proto-chip" data-go="hk-tenders">10 現在招標</button>
+  <button class="proto-chip" data-go="intake">11 標書匯入</button>
+  <button class="proto-chip" data-go="contract">12 合約類型</button>
+  <button class="proto-chip" data-go="nav-map">13 提交導航器</button>
+  <span class="proto-strip__sep"></span>
+  <button class="proto-chip" data-go="site">14 Site Aspect</button>
+  <button class="proto-chip" data-go="tech">15 技術施工方案</button>
+  <button class="proto-chip" data-go="schedule">16 進度規劃</button>
+  <button class="proto-chip" data-go="backup">17 資料與備份</button>
+  <span class="proto-strip__sep"></span>
+  <button class="proto-chip on" data-go="overview-1">1 總覽 · 空狀態</button>
+  <button class="proto-chip" data-go="overview-2">2 總覽 · 有專案</button>
+  <button class="proto-chip" data-go="takeoff">3 量測引擎</button>
+  <button class="proto-chip" data-go="bridge">4 算量接口</button>
+  <button class="proto-chip" data-go="sor">5 SoR 造價核心</button>
+  <button class="proto-chip" data-go="compliance">6 合規矩陣</button>
+  <button class="proto-chip" data-go="output">7 提交清單</button>
+  <button class="proto-chip" data-go="mcp">8 MCP 服務</button>
+  <button class="proto-chip" data-go="states">9 狀態樣板</button>
+</div>
+
+<div class="app">
+  <!-- ================= TOPBAR ================= -->
+  <header class="topbar">
+    <button class="btn btn--icon btn--ghost" id="collapse" title="收合側邊欄" aria-label="收合側邊欄">☰</button>
+
+    <a class="brand" href="#" data-go="overview-1">
+      <span class="brand__vi">Vi</span><span class="brand__cons">Cons</span>
+      <span class="brand__tag">工程版</span>
+    </a>
+
+    <div class="proj-switch" title="切換專案">
+      <div>
+        <div class="proj-switch__label">當前專案</div>
+        <div class="proj-switch__name" id="proj-name">WO 054B · 示範醫院 A 專科翻新</div>
+      </div>
+      <div class="proj-switch__id" id="proj-id">AC-2024-045 ▾</div>
+    </div>
+
+    <div class="gsearch">
+      <span aria-hidden="true" class="u-muted">⌕</span>
+      <input type="search" placeholder="搜尋項目、圖號、SoR 代碼…" aria-label="全域搜尋">
+      <kbd>Ctrl K</kbd>
+    </div>
+
+    <div class="topbar__spacer"></div>
+
+    <div class="status-strip">
+      <div class="status-item" title="量測引擎連線狀態">
+        <span class="dot dot--ok" id="st-engine"></span><span id="st-engine-txt">引擎</span>
+      </div>
+      <div class="status-item" title="本地資料庫">
+        <span class="dot dot--ok"></span><span>IndexedDB</span>
+      </div>
+      <div class="status-item" title="MCP 服務">
+        <span class="dot dot--warn"></span><span>MCP 待信任</span>
+      </div>
+    </div>
+
+    <button class="btn btn--icon btn--ghost" title="說明" aria-label="說明">?</button>
+    <button class="btn btn--icon btn--ghost" title="設定" aria-label="設定">⚙</button>
+  </header>
+
+  <div class="app__body" id="app-body">
+    <!-- ================= SIDEBAR ================= -->
+    <nav class="sidebar" id="sidebar" aria-label="主導航">
+      <div class="navgroup">
+        <div class="navgroup__title">投標準備 <span class="navgroup__rule"></span></div>
+        <a class="navitem" data-view="hk-tenders" href="#hk-tenders">
+          <span class="navitem__icon">⌕</span><span class="navitem__label">現在招標</span>
+          <span class="navitem__badge navitem__badge--ok">4</span></a>
+        <a class="navitem" data-view="overview" href="#overview-1" aria-current="page">
+          <span class="navitem__icon">▦</span><span class="navitem__label">總覽</span></a>
+        <a class="navitem" data-view="intake" href="#intake">
+          <span class="navitem__icon">⇪</span><span class="navitem__label">標書匯入</span>
+          <span class="navitem__badge navitem__badge--warn">3</span></a>
+        <a class="navitem" data-view="contract" href="#contract">
+          <span class="navitem__icon">▤</span><span class="navitem__label">合約類型</span></a>
+        <a class="navitem" data-view="nav-map" href="#nav-map">
+          <span class="navitem__icon">⌗</span><span class="navitem__label">提交導航器</span>
+          <span class="navitem__badge navitem__badge--danger">5</span></a>
+      </div>
+
+      <div class="navgroup">
+        <div class="navgroup__title">算量 <span class="navgroup__rule"></span></div>
+        <a class="navitem" data-view="takeoff" href="#takeoff">
+          <span class="navitem__icon">◫</span><span class="navitem__label">量測引擎</span>
+          <span class="navitem__badge navitem__badge--ok">就緒</span></a>
+        <a class="navitem" data-view="bridge" href="#bridge">
+          <span class="navitem__icon">⇄</span><span class="navitem__label">算量接口</span></a>
+        <a class="navitem" data-view="sor" href="#sor">
+          <span class="navitem__icon">▥</span><span class="navitem__label">SoR 造價核心</span>
+          <span class="navitem__badge navitem__badge--warn">142</span></a>
+      </div>
+
+      <div class="navgroup">
+        <div class="navgroup__title">編製 <span class="navgroup__rule"></span></div>
+        <a class="navitem" data-view="site" href="#site">
+          <span class="navitem__icon">☑</span><span class="navitem__label">Site Aspect</span></a>
+        <a class="navitem" data-view="tech" href="#tech">
+          <span class="navitem__icon">▤</span><span class="navitem__label">技術施工方案</span></a>
+        <a class="navitem" data-view="schedule" href="#schedule">
+          <span class="navitem__icon">▦</span><span class="navitem__label">進度規劃</span></a>
+        <a class="navitem" data-view="compliance" href="#compliance">
+          <span class="navitem__icon">⚖</span><span class="navitem__label">合規矩陣</span>
+          <span class="navitem__badge navitem__badge--danger">2</span></a>
+      </div>
+
+      <div class="navgroup">
+        <div class="navgroup__title">產出 <span class="navgroup__rule"></span></div>
+        <a class="navitem" data-view="output" href="#output">
+          <span class="navitem__icon">⇩</span><span class="navitem__label">提交清單</span></a>
+        <a class="navitem" data-view="mcp" href="#mcp">
+          <span class="navitem__icon">⚙</span><span class="navitem__label">MCP 服務</span></a>
+        <a class="navitem" data-view="backup" href="#backup">
+          <span class="navitem__icon">🗄</span><span class="navitem__label">資料與備份</span></a>
+      </div>
+    </nav>
+
+    <!-- ================= MAIN ================= -->
+    <main class="main" id="main" tabindex="-1">
+      <div class="main__wrap" id="view-root"><!-- 由 app.js 注入 --></div>
+    </main>
+  </div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
+
+<script src="app/protoshell.js"></script>
+<script src="app/devpanel.js"></script>
+
+<!-- 骨幹畫面（第一批：9 個） -->
+<script src="app/views/overview.js"></script>
+<script src="app/views/takeoff.js"></script>
+<script src="app/views/bridge.js"></script>
+<script src="app/views/sor.js"></script>
+<script src="app/views/compliance.js"></script>
+<script src="app/views/output.js"></script>
+<script src="app/views/mcp.js"></script>
+<script src="app/views/states.js"></script>
+
+<!-- 補充畫面（第二批：8 個，補齊 VicBid 既有功能） -->
+<script src="app/views/hktenders.js"></script>
+<script src="app/views/intake.js"></script>
+<script src="app/views/contract.js"></script>
+<script src="app/views/navmap.js"></script>
+<script src="app/views/site.js"></script>
+<script src="app/views/tech.js"></script>
+<script src="app/views/schedule.js"></script>
+<script src="app/views/backup.js"></script>
+
+<script src="app/boot.js"></script>
+</body>
+</html>

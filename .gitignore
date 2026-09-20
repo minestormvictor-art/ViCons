@@ -1,0 +1,45 @@
+# ---------- WorkBuddy／AI 工具內部資料 ----------
+.workbuddy/
+.tribro/
+
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# ---------- Node ----------
+node_modules/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---------- 編輯器／系統 ----------
+.vscode/
+.idea/
+*.swp
+*.swo
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# ---------- 日誌與暫存 ----------
+*.log
+*.tmp
+*.bak
+~$*
+
+# ---------- 部署產物 ----------
+_cf_drop/
+*.zip
+dist/
+
+# ---------- 憑證（永不入庫） ----------
+.env
+.env.*
+*.pem
+*.key
+*.pfx
+credentials.json
