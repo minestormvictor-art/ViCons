@@ -46,3 +46,9 @@ dist/
 *.key
 *.pfx
 credentials.json
+
+# ---------- 敏感詞清單（清單本身會洩漏它要保護的名字）----------
+_sensitive-patterns.txt
+
+# ---------- 本機工作區路徑記錄（去識別化的原版對照）----------
+_backup_realdata/
