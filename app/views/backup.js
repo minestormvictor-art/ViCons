@@ -42,7 +42,7 @@
       el('div', { style: 'width:38px; height:38px; border-radius:var(--r-md); display:grid; place-items:center; background:var(--ok-wash); border:1px solid var(--ok-line); color:var(--ok); font-size:18px' }, '🗄'),
       el('div', {},
         el('div', { class: 'u-strong' }, 'IndexedDB 本機儲存'),
-        el('div', { class: 'u-muted', style: 'font-size:var(--fs-xs)' }, 'vidbid_db v2 · 13 個 store · 資料不會上傳到任何伺服器')));
+        el('div', { class: 'u-muted', style: 'font-size:var(--fs-xs)' }, 'vicbid_db v2 · 13 個 store · 資料不會上傳到任何伺服器')));
 
     var usage = el('div', { style: 'margin-top:var(--sp-4)' },
       el('div', { style: 'display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--sp-2)' },
