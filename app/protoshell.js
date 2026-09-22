@@ -156,13 +156,14 @@
     Array.prototype.forEach.call(document.querySelectorAll('.proto-chip'), function (b) {
       b.addEventListener('click', function () { go(b.dataset.go); });
     });
-    /* 側邊欄：無專屬畫面的先導去總覽，並提示 */
+    /* 側邊欄：overview 對應兩個狀態畫面；其餘無註冊者提示尚在規劃 */
     Array.prototype.forEach.call(document.querySelectorAll('.navitem'), function (a) {
       a.addEventListener('click', function (e) {
         e.preventDefault();
         var id = a.dataset.view;
+        if (id === 'overview') { go('overview-2'); return; }
         if (findView(id)) { go(id); return; }
-        go(id === 'overview' ? 'overview-2' : 'overview-2');
+        go('overview-2');
         toast('「' + a.querySelector('.navitem__label').textContent + '」畫面尚在規劃中，本原型聚焦 UI 骨幹', 'info');
       });
     });
