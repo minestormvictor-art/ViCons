@@ -22,6 +22,13 @@ import sys
 import zipfile
 from pathlib import Path
 
+# Windows cp950 / legacy consoles cannot print ✓ — force UTF-8 when possible.
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
+
 HERE = Path(__file__).resolve().parent
 ENTRY = "index.html"
 DROP_DIR = HERE / "_cf_drop" / "vicons"
